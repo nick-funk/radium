@@ -1,0 +1,67 @@
+﻿kernel void mandelbrot(
+			const float realFactor,
+            const float imaginaryFactor, 
+			const float realLeft,
+            const float imaginaryBottom, 
+			const float imaginaryTop,
+            const unsigned int maxIterations, 
+			const unsigned int width,
+			global char* buffer)
+{
+    int xDim = get_global_id(0);
+    int yDim = get_global_id(1);
+    int index = (4 * width * yDim) + (xDim * 4);
+
+    float c_re = realLeft + xDim * realFactor;
+
+    float c_im = imaginaryTop - yDim * imaginaryFactor;
+    float Z_re = c_re, Z_im = c_im;
+
+    uint n;
+
+    bool isInside = true;
+
+    for (n = 0; n < maxIterations; n++)
+    {
+        float Z_re2 = Z_re * Z_re, Z_im2 = Z_im * Z_im;
+
+        if (Z_re2 + Z_im2 > 4)
+        {
+            isInside = false;
+
+            break;
+        }
+
+        Z_im = 2 * Z_re * Z_im + c_im;
+
+        Z_re = Z_re2 - Z_im2 + c_re;
+    }
+
+    buffer[index] = 0xff;
+
+    if (isInside)
+    {
+        buffer[index + 1] = 0;
+        buffer[index + 2] = 0;
+        buffer[index + 3] = 0;
+    }
+
+    else
+    {
+        float colorValue = (float)n / (float)maxIterations * 256.0f;
+
+        if (n < (maxIterations / 2) - 1)
+        {
+            buffer[index + 1] = 0;
+            buffer[index + 2] = 0;
+            buffer[index + 3] = (char)colorValue;
+        }
+
+        else
+        {
+            buffer[index + 1] = (char)colorValue;
+            buffer[index + 2] = (char)colorValue;
+            buffer[index + 3] = 255;
+        }
+    }
+}

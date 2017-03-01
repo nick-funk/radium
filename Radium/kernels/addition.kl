@@ -1,0 +1,9 @@
+﻿kernel void addition(
+	const float a, 
+	const float b,
+	global float* buffer)
+{
+	int index = 0;
+
+	buffer[index] = a + b;
+}

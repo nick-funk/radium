@@ -1,0 +1,8 @@
+﻿kernel void addmany(
+	global float* a, 
+	global float* b,
+	global float* result)
+{
+	int index = get_global_id(0);
+    result[index] = a[index] + b[index];
+}

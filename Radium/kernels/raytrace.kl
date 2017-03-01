@@ -1,0 +1,99 @@
+﻿struct Ray
+{
+	float3 origin;
+	float3 direction;
+};
+
+struct Sphere
+{
+	float3 position;
+	float radius;
+};
+
+void SetColor(global char* buffer, int index, char r, char g, char b, char a)
+{
+	buffer[index] = b;
+	buffer[index + 1] = g;
+    buffer[index + 2] = r;
+    buffer[index + 3] = a;
+}
+
+bool RaySphere(struct Sphere* s, struct Ray* r, float* t)
+{
+	float3 rayToCenter = s->position - r->origin;
+	float dotProduct = dot(r->direction, rayToCenter);
+	float d = dotProduct * dotProduct - dot(rayToCenter, rayToCenter) + s->radius * s->radius;
+
+	if (d < 0)
+	{
+		return false;
+	}
+
+	*t = dotProduct - sqrt(d);
+
+	if (*t < 0)
+	{
+		*t = dotProduct + sqrt(d);
+
+		if (*t < 0)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+kernel void raytrace(
+	const unsigned int width,
+	const unsigned int height,
+    global char* buffer,
+	global float* spheres,
+	global float* camera)
+{
+    int xDim = get_global_id(0);
+    int yDim = get_global_id(1);
+    int index = (4 * width * yDim) + (xDim * 4);
+
+	float3 spherePosition = { spheres[0], spheres[1], spheres[2] };
+	float radius = spheres[3];
+
+	float3 spherePosition2 = { spheres[4], spheres[5], spheres[6] };
+	float radius2 = spheres[7];
+
+	struct Sphere sphere;
+	sphere.position = spherePosition;
+	sphere.radius = radius;
+
+	struct Sphere sphere2;
+	sphere2.position = spherePosition2;
+	sphere2.radius = radius2;
+
+	float3 cameraPosition = { camera[0], camera[1], camera[2] };
+	float3 cameraDirection = { camera[3], camera[4], camera[5] };
+
+	float dx = 1.0f / (float)(width);
+	float dy = 1.0f / (float)(height);
+	float aspect = (float)(width) / (float)(height);
+
+	float3 rayOrigin = { (cameraPosition.x + dx * (float)(xDim) - 0.5f) * aspect, cameraPosition.y - dy * (float)(yDim) + 0.5f, cameraPosition.z };
+
+	struct Ray cameraRay;
+	cameraRay.origin = rayOrigin;
+	cameraRay.direction = cameraDirection;
+
+	SetColor(buffer, index, 255, 255, 255, 255);
+	
+	float t = 0;
+	bool intersect = RaySphere(&sphere, &cameraRay, &t);
+	if (intersect)
+	{
+		SetColor(buffer, index, 0, 0, 255, 255);
+	}
+
+	intersect = RaySphere(&sphere2, &cameraRay, &t);
+	if (intersect)
+	{
+		SetColor(buffer, index, 255, 0, 0, 255);
+	}
+}
