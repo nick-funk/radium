@@ -18,7 +18,7 @@ void SetColor(global char* buffer, int index, char r, char g, char b, char a)
     buffer[index + 3] = a;
 }
 
-bool RaySphere(struct Sphere* s, struct Ray* r, float* t)
+bool IntersectSphere(struct Sphere* s, struct Ray* r, float* t)
 {
 	float3 rayToCenter = s->position - r->origin;
 	float dotProduct = dot(r->direction, rayToCenter);
@@ -85,13 +85,13 @@ kernel void raytrace(
 	SetColor(buffer, index, 255, 255, 255, 255);
 	
 	float t = 0;
-	bool intersect = RaySphere(&sphere, &cameraRay, &t);
+	bool intersect = IntersectSphere(&sphere, &cameraRay, &t);
 	if (intersect)
 	{
 		SetColor(buffer, index, 0, 0, 255, 255);
 	}
 
-	intersect = RaySphere(&sphere2, &cameraRay, &t);
+	intersect = IntersectSphere(&sphere2, &cameraRay, &t);
 	if (intersect)
 	{
 		SetColor(buffer, index, 255, 0, 0, 255);
