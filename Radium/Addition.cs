@@ -2,7 +2,7 @@
 {
     using Cloo;
 
-    public class Addition : GpuCompute
+    public class Addition : GpuCompute<float>
     {
         private readonly float a;
         private readonly float b;
@@ -14,7 +14,7 @@
             this.b = b;
         }
 
-        protected override object Execute()
+        protected override float Execute()
         {
             ComputeBuffer<float> kernelOutput = new ComputeBuffer<float>(this.Context, ComputeMemoryFlags.WriteOnly, 1);
 

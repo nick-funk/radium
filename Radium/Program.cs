@@ -1,7 +1,6 @@
 ﻿namespace Radium
 {
     using System;
-    using System.Drawing;
 
     class Program
     {
@@ -35,14 +34,14 @@
         private static void RayTrace()
         {
             var rayTracer = new RayTrace(new GpuProgram("kernels/raytrace.kl"), 1280, 720);
-            var image = rayTracer.Run() as Image;
-            image?.Save("raytrace.png");
+            var image = rayTracer.Run();
+            image.Save("raytrace.png");
         }
 
         private static void AddMany(int amount)
         {
             var addManyComputation = new AddMany(new GpuProgram("kernels/addmany.kl"), amount);
-            var manyResult = (float[]) addManyComputation.Run();
+            var manyResult = addManyComputation.Run();
             Console.WriteLine(string.Join(",", manyResult));
             Console.ReadKey();
         }
@@ -50,7 +49,7 @@
         private static void Addition(float a, float b)
         {
             var additionComputation = new Addition(new GpuProgram("kernels/addition.kl"), a, b);
-            var result = (float) additionComputation.Run();
+            var result = additionComputation.Run();
             Console.WriteLine($"{a} + {b} = {result}");
             Console.ReadKey();
         }
@@ -58,7 +57,7 @@
         private static void Mandelbrot()
         {
             var mandelbrotRenderer = new MandelbrotRenderer(new GpuProgram("kernels/mandelbrot.kl"));
-            var mandelbrotImage = mandelbrotRenderer.Run() as Image;
+            var mandelbrotImage = mandelbrotRenderer.Run();
             mandelbrotImage?.Save("mandelbrot.png");
         }
     }

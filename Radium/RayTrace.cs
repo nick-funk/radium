@@ -6,7 +6,7 @@ namespace Radium
     using System.Runtime.InteropServices;
     using Cloo;
 
-    public class RayTrace : GpuCompute
+    public class RayTrace : GpuCompute<Bitmap>
     {
         private readonly int width;
         private readonly int height;
@@ -18,7 +18,7 @@ namespace Radium
             this.height = height;
         }
 
-        protected override object Execute()
+        protected override Bitmap Execute()
         {
             Bitmap image;
 

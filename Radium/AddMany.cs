@@ -3,7 +3,7 @@
     using System;
     using Cloo;
 
-    public class AddMany : GpuCompute
+    public class AddMany : GpuCompute<float[]>
     {
         private readonly int count;
 
@@ -13,7 +13,7 @@
             this.count = count;
         }
 
-        protected override object Execute()
+        protected override float[] Execute()
         {
             var arrayA = new float[this.count];
             var arrayB = new float[this.count];

@@ -3,7 +3,7 @@
     using System;
     using Cloo;
 
-    public abstract class GpuCompute
+    public abstract class GpuCompute<T>
     {
         private readonly IGpuProgram sourceProgram;
 
@@ -29,7 +29,7 @@
 
         protected ComputeKernel Kernel { get; private set; }
 
-        public object Run()
+        public T Run()
         {
             if (!this.programIsLoaded)
             {
@@ -40,7 +40,7 @@
             return this.Execute();
         }
 
-        protected abstract object Execute();
+        protected abstract T Execute();
 
         private void LoadProgram()
         {

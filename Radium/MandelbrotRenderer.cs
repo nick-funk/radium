@@ -6,14 +6,14 @@
     using System.Runtime.InteropServices;
     using Cloo;
 
-    public class MandelbrotRenderer : GpuCompute
+    public class MandelbrotRenderer : GpuCompute<Bitmap>
     {
         public MandelbrotRenderer(IGpuProgram sourceProgram)
             : base(sourceProgram)
         {
         }
 
-        protected override object Execute()
+        protected override Bitmap Execute()
         {
             Bitmap image;
             var height = 720;
