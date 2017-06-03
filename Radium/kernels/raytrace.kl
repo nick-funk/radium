@@ -92,6 +92,9 @@ kernel void raytrace(
 
 	SetColor(buffer, index, 255, 255, 255, 255);
 	
+	int intersectIndex = -1;
+	float minIntersect = 1000000;
+
 	for (int i = 0; i < sphereCount; i++)
 	{
 		float t = 0;
@@ -99,7 +102,22 @@ kernel void raytrace(
 
 		if (intersect)
 		{
-			SetColor(buffer, index, readSpheres[i].color.x, readSpheres[i].color.y, readSpheres[i].color.z, 255);
+			if (t < minIntersect)
+			{
+				minIntersect = t;
+				intersectIndex = i;
+			}
 		}
+	}
+
+	if (intersectIndex > -1)
+	{
+		SetColor(
+			buffer, 
+			index, 
+			readSpheres[intersectIndex].color.x, 
+			readSpheres[intersectIndex].color.y, 
+			readSpheres[intersectIndex].color.z, 
+			255);
 	}
 }
