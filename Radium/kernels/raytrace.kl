@@ -7,6 +7,7 @@
 struct Sphere
 {
 	float3 position;
+	float3 color;
 	float radius;
 };
 
@@ -44,9 +45,27 @@ bool IntersectSphere(struct Sphere* s, struct Ray* r, float* t)
 	return true;
 }
 
+void getSpheres(global float* data, struct Sphere* spheres, int count)
+{
+	int index = 0;
+	for (int i = 0; i < count; i++)
+	{
+		float3 spherePosition = { data[index], data[index + 1], data[index + 2] };
+		float radius = data[index + 3];
+		float3 color = { data[index + 4], data[index + 5], data[index + 6]};
+
+		spheres[i].position = spherePosition;
+		spheres[i].radius = radius;
+		spheres[i].color = color;
+
+		index += 7;
+	}
+}
+
 kernel void raytrace(
 	const unsigned int width,
 	const unsigned int height,
+	const unsigned int sphereCount,
     global char* buffer,
 	global float* spheres,
 	global float* camera)
@@ -55,19 +74,8 @@ kernel void raytrace(
     int yDim = get_global_id(1);
     int index = (4 * width * yDim) + (xDim * 4);
 
-	float3 spherePosition = { spheres[0], spheres[1], spheres[2] };
-	float radius = spheres[3];
-
-	float3 spherePosition2 = { spheres[4], spheres[5], spheres[6] };
-	float radius2 = spheres[7];
-
-	struct Sphere sphere;
-	sphere.position = spherePosition;
-	sphere.radius = radius;
-
-	struct Sphere sphere2;
-	sphere2.position = spherePosition2;
-	sphere2.radius = radius2;
+	struct Sphere readSpheres[2];
+	getSpheres(spheres, readSpheres, sphereCount);
 
 	float3 cameraPosition = { camera[0], camera[1], camera[2] };
 	float3 cameraDirection = { camera[3], camera[4], camera[5] };
@@ -84,16 +92,14 @@ kernel void raytrace(
 
 	SetColor(buffer, index, 255, 255, 255, 255);
 	
-	float t = 0;
-	bool intersect = IntersectSphere(&sphere, &cameraRay, &t);
-	if (intersect)
+	for (int i = 0; i < sphereCount; i++)
 	{
-		SetColor(buffer, index, 0, 0, 255, 255);
-	}
+		float t = 0;
+		bool intersect = IntersectSphere(&readSpheres[i], &cameraRay, &t);
 
-	intersect = IntersectSphere(&sphere2, &cameraRay, &t);
-	if (intersect)
-	{
-		SetColor(buffer, index, 255, 0, 0, 255);
+		if (intersect)
+		{
+			SetColor(buffer, index, readSpheres[i].color.x, readSpheres[i].color.y, readSpheres[i].color.z, 255);
+		}
 	}
 }

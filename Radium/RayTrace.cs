@@ -27,8 +27,8 @@ namespace Radium
 
             var spheres = new[]
             {
-                0, 0, 0, 0.25f,
-                0.5f, 0, 0, 0.3f
+                0, 0, 0, 0.25f, 255, 0, 0,
+                0.5f, 0, 0, 0.3f, 0, 255, 0
             };
 
             ComputeBuffer<float> sphereData = new ComputeBuffer<float>(
@@ -44,9 +44,10 @@ namespace Radium
 
             this.Kernel.SetValueArgument(0, this.width);
             this.Kernel.SetValueArgument(1, this.height);
-            this.Kernel.SetMemoryArgument(2, kernelOutput);
-            this.Kernel.SetMemoryArgument(3, sphereData);
-            this.Kernel.SetMemoryArgument(4, cameraData);
+            this.Kernel.SetValueArgument(2, 2);
+            this.Kernel.SetMemoryArgument(3, kernelOutput);
+            this.Kernel.SetMemoryArgument(4, sphereData);
+            this.Kernel.SetMemoryArgument(5, cameraData);
 
             this.Commands.Execute(this.Kernel, null, new long[] {this.width, this.height }, null, this.Events);
 
