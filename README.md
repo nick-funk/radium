@@ -64,7 +64,12 @@ public class Addition : GpuCompute<float> // Return type for two floats added to
 }
 ```
 
-Now, let's write the code that will be run on the GPU to add two values together
+Now, let's write the code that will be run on the GPU to add two float values together.
+This is a separate text file that is stored in your project.
+
+I usually create a folder called ```kernels``` and would save this file as ```addition.kl``` (the kl stands for kernel).
+
+Make sure that you set each kernel file's "Copy to Output Directory" property in Visual Studio to "Copy if Newer" so that it is available to your application when it goes to compile the kernel file for the GPU.
 
 ```c
 kernel void addition(
