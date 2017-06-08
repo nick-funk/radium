@@ -42,12 +42,19 @@ namespace Radium
                 ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.CopyHostPointer,
                 camera);
 
+            var lightPosition = new[] { -1f, 1f, 1f };
+            ComputeBuffer<float> lightData = new ComputeBuffer<float>(
+                this.Context,
+                ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.CopyHostPointer,
+                lightPosition);
+
             this.Kernel.SetValueArgument(0, this.width);
             this.Kernel.SetValueArgument(1, this.height);
             this.Kernel.SetValueArgument(2, 2);
             this.Kernel.SetMemoryArgument(3, kernelOutput);
             this.Kernel.SetMemoryArgument(4, sphereData);
             this.Kernel.SetMemoryArgument(5, cameraData);
+            this.Kernel.SetMemoryArgument(6, lightData);
 
             this.Commands.Execute(this.Kernel, null, new long[] {this.width, this.height }, null, this.Events);
 

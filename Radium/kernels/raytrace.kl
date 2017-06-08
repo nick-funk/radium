@@ -45,6 +45,14 @@ bool IntersectSphere(struct Sphere* s, struct Ray* r, float* t)
 	return true;
 }
 
+float3 ComputeNormal(struct Sphere* s, struct Ray* r, float t)
+{
+	float3 position = r->origin + (r->direction * t);
+	float3 normal = normalize(position - s->position);
+
+	return normal;
+}
+
 void getSpheres(global float* data, struct Sphere* spheres, int count)
 {
 	int index = 0;
@@ -68,7 +76,8 @@ kernel void raytrace(
 	const unsigned int sphereCount,
     global char* buffer,
 	global float* spheres,
-	global float* camera)
+	global float* camera,
+	global float* lights)
 {
     int xDim = get_global_id(0);
     int yDim = get_global_id(1);
@@ -90,9 +99,12 @@ kernel void raytrace(
 	cameraRay.origin = rayOrigin;
 	cameraRay.direction = cameraDirection;
 
-	SetColor(buffer, index, 255, 255, 255, 255);
-	
+	float3 lightPosition = { lights[0], lights[1], lights[2] };
+
+	SetColor(buffer, index, 0, 0, 0, 255);
+
 	int intersectIndex = -1;
+	float lightAmount = 0;
 	float minIntersect = 1000000;
 
 	for (int i = 0; i < sphereCount; i++)
@@ -106,6 +118,11 @@ kernel void raytrace(
 			{
 				minIntersect = t;
 				intersectIndex = i;
+
+				float3 intersectPosition = cameraRay.origin + (cameraRay.direction * t);
+				float3 lightDirection = normalize(lightPosition - intersectPosition);
+
+				lightAmount = max(0.0f, dot(ComputeNormal(&readSpheres[i], &cameraRay, t), lightDirection));
 			}
 		}
 	}
@@ -115,9 +132,9 @@ kernel void raytrace(
 		SetColor(
 			buffer, 
 			index, 
-			readSpheres[intersectIndex].color.x, 
-			readSpheres[intersectIndex].color.y, 
-			readSpheres[intersectIndex].color.z, 
+			0.9 * lightAmount * readSpheres[intersectIndex].color.x + 0.1 * readSpheres[intersectIndex].color.x,
+			0.9 * lightAmount * readSpheres[intersectIndex].color.y + 0.1 * readSpheres[intersectIndex].color.y, 
+			0.9 * lightAmount * readSpheres[intersectIndex].color.z + 0.1 * readSpheres[intersectIndex].color.z, 
 			255);
 	}
 }
