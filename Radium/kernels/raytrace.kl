@@ -53,7 +53,7 @@ float3 ComputeNormal(struct Sphere* s, struct Ray* r, float t)
 	return normal;
 }
 
-void getSpheres(global float* data, struct Sphere* spheres, int count)
+void GetSpheres(global float* data, struct Sphere* spheres, int count)
 {
 	int index = 0;
 	for (int i = 0; i < count; i++)
@@ -84,7 +84,7 @@ kernel void raytrace(
     int index = (4 * width * yDim) + (xDim * 4);
 
 	struct Sphere readSpheres[2];
-	getSpheres(spheres, readSpheres, sphereCount);
+	GetSpheres(spheres, readSpheres, sphereCount);
 
 	float3 cameraPosition = { camera[0], camera[1], camera[2] };
 	float3 cameraDirection = { camera[3], camera[4], camera[5] };
