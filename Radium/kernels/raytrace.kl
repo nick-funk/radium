@@ -106,6 +106,8 @@ kernel void raytrace(
 	int intersectIndex = -1;
 	float lightAmount = 0;
 	float minIntersect = 1000000;
+	float3 lightDirection;
+	float3 intersectPosition;
 
 	for (int i = 0; i < sphereCount; i++)
 	{
@@ -119,8 +121,8 @@ kernel void raytrace(
 				minIntersect = t;
 				intersectIndex = i;
 
-				float3 intersectPosition = cameraRay.origin + (cameraRay.direction * t);
-				float3 lightDirection = normalize(lightPosition - intersectPosition);
+				intersectPosition = cameraRay.origin + (cameraRay.direction * t);
+				lightDirection = normalize(lightPosition - intersectPosition);
 
 				lightAmount = max(0.0f, dot(ComputeNormal(&readSpheres[i], &cameraRay, t), lightDirection));
 			}
@@ -129,6 +131,31 @@ kernel void raytrace(
 
 	if (intersectIndex > -1)
 	{
+		struct Ray lightRay;
+		lightRay.origin = intersectPosition;
+		lightRay.direction = lightDirection;
+		bool inShadow = false;
+
+		for (int i = 0; i < sphereCount; i++)
+		{
+			if (intersectIndex != i)
+			{
+				float t = 0;
+				bool intersect = IntersectSphere(&readSpheres[i], &lightRay, &t);
+
+				if (intersect)
+				{
+					inShadow = true;
+					break;
+				}
+			}
+		}
+
+		if (inShadow)
+		{
+			lightAmount *= 0.25;
+		}
+
 		SetColor(
 			buffer, 
 			index, 

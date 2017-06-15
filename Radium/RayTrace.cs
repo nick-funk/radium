@@ -11,12 +11,15 @@ namespace Radium
         private readonly int width;
         private readonly int height;
 
-        public RayTrace(IGpuProgram sourceProgram, int width, int height)
+        public RayTrace(IGpuProgram sourceProgram, int width, int height, float[] light0)
             : base(sourceProgram)
         {
+            this.Light0 = light0;
             this.width = width;
             this.height = height;
         }
+
+        public float[] Light0 { get; set; }
 
         protected override Bitmap Execute()
         {
@@ -28,7 +31,10 @@ namespace Radium
             var spheres = new[]
             {
                 0, 0, 0, 0.25f, 255, 0, 0,
-                0.5f, 0, 0.5f, 0.3f, 0, 255, 0
+                -0.35f, 0.5f, 0, 0.25f, 255, 255, 0,
+                0.2f, 0.25f, 0.75f, 0.1f, 0, 255, 255,
+                0.5f, 0, 0.5f, 0.3f, 0, 255, 0,
+                -0.5f, 0, 0.5f, 0.3f, 0, 25, 180
             };
 
             ComputeBuffer<float> sphereData = new ComputeBuffer<float>(
@@ -42,7 +48,7 @@ namespace Radium
                 ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.CopyHostPointer,
                 camera);
 
-            var lightPosition = new[] { -1f, 1f, 1f };
+            var lightPosition = new[] { this.Light0[0], this.Light0[1], this.Light0[2] };
             ComputeBuffer<float> lightData = new ComputeBuffer<float>(
                 this.Context,
                 ComputeMemoryFlags.ReadOnly | ComputeMemoryFlags.CopyHostPointer,
@@ -50,7 +56,7 @@ namespace Radium
 
             this.Kernel.SetValueArgument(0, this.width);
             this.Kernel.SetValueArgument(1, this.height);
-            this.Kernel.SetValueArgument(2, 2);
+            this.Kernel.SetValueArgument(2, spheres.Length / 7);
             this.Kernel.SetMemoryArgument(3, kernelOutput);
             this.Kernel.SetMemoryArgument(4, sphereData);
             this.Kernel.SetMemoryArgument(5, cameraData);
