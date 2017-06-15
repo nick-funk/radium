@@ -121,3 +121,4 @@ To stop talking, and show you the results, here is the results of a ray tracer k
 [![GPU Raytracing using Radium](https://img.youtube.com/vi/Hu1327IZGQg/0.jpg)](https://www.youtube.com/watch?v=Hu1327IZGQg)
 
 This was an 80 frame animation that was computed in under 800 milliseconds on a single nVidia GTX 660 graphics card.
+That's 100 frames per second.
