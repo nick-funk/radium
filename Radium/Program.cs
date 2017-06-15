@@ -33,7 +33,6 @@
 
         private static void RayTrace()
         {
-
             var rayTracer = new RayTrace(new GpuProgram("kernels/raytrace.kl"), 1280, 720, new [] { -1f, 1f, 1f });
 
             int index = 0;
