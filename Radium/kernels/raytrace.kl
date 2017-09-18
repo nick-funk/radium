@@ -77,6 +77,7 @@ kernel void raytrace(
     global char* buffer,
 	global float* spheres,
 	global float* camera,
+	const unsigned int lightCount,
 	global float* lights)
 {
     int xDim = get_global_id(0);
@@ -99,69 +100,77 @@ kernel void raytrace(
 	cameraRay.origin = rayOrigin;
 	cameraRay.direction = cameraDirection;
 
-	float3 lightPosition = { lights[0], lights[1], lights[2] };
+	float4 color = (float4)(0, 0, 0, 255);
+	float sharedLightCoefficient = 1.0 / lightCount;
 
-	SetColor(buffer, index, 0, 0, 0, 255);
-
-	int intersectIndex = -1;
-	float lightAmount = 0;
-	float minIntersect = 1000000;
-	float3 lightDirection;
-	float3 intersectPosition;
-
-	for (int i = 0; i < sphereCount; i++)
+	for (int l = 0; l < lightCount * 3; l += 3)
 	{
-		float t = 0;
-		bool intersect = IntersectSphere(&readSpheres[i], &cameraRay, &t);
+		float3 lightPosition = { lights[l], lights[l + 1], lights[l + 2] };
 
-		if (intersect)
-		{
-			if (t < minIntersect)
-			{
-				minIntersect = t;
-				intersectIndex = i;
-
-				intersectPosition = cameraRay.origin + (cameraRay.direction * t);
-				lightDirection = normalize(lightPosition - intersectPosition);
-
-				lightAmount = max(0.0f, dot(ComputeNormal(&readSpheres[i], &cameraRay, t), lightDirection));
-			}
-		}
-	}
-
-	if (intersectIndex > -1)
-	{
-		struct Ray lightRay;
-		lightRay.origin = intersectPosition;
-		lightRay.direction = lightDirection;
-		bool inShadow = false;
+		int intersectIndex = -1;
+		float lightAmount = 0;
+		float minIntersect = 1000000;
+		float3 lightDirection;
+		float3 intersectPosition;
 
 		for (int i = 0; i < sphereCount; i++)
 		{
-			if (intersectIndex != i)
-			{
-				float t = 0;
-				bool intersect = IntersectSphere(&readSpheres[i], &lightRay, &t);
+			float t = 0;
+			bool intersect = IntersectSphere(&readSpheres[i], &cameraRay, &t);
 
-				if (intersect)
+			if (intersect)
+			{
+				if (t < minIntersect)
 				{
-					inShadow = true;
-					break;
+					minIntersect = t;
+					intersectIndex = i;
+
+					intersectPosition = cameraRay.origin + (cameraRay.direction * t);
+					lightDirection = normalize(lightPosition - intersectPosition);
+
+					lightAmount = max(0.0f, dot(ComputeNormal(&readSpheres[i], &cameraRay, t), lightDirection));
 				}
 			}
 		}
 
-		if (inShadow)
+		if (intersectIndex > -1)
 		{
-			lightAmount *= 0.25;
-		}
+			struct Ray lightRay;
+			lightRay.origin = intersectPosition;
+			lightRay.direction = lightDirection;
+			bool inShadow = false;
 
-		SetColor(
-			buffer, 
-			index, 
-			0.9 * lightAmount * readSpheres[intersectIndex].color.x + 0.1 * readSpheres[intersectIndex].color.x,
-			0.9 * lightAmount * readSpheres[intersectIndex].color.y + 0.1 * readSpheres[intersectIndex].color.y, 
-			0.9 * lightAmount * readSpheres[intersectIndex].color.z + 0.1 * readSpheres[intersectIndex].color.z, 
-			255);
+			for (int i = 0; i < sphereCount; i++)
+			{
+				if (intersectIndex != i)
+				{
+					float t = 0;
+					bool intersect = IntersectSphere(&readSpheres[i], &lightRay, &t);
+
+					if (intersect)
+					{
+						inShadow = true;
+						break;
+					}
+				}
+			}
+
+			if (inShadow)
+			{
+				lightAmount *= 0.25;
+			}
+
+			color.x += sharedLightCoefficient * (0.9 * lightAmount * readSpheres[intersectIndex].color.x + 0.1 * readSpheres[intersectIndex].color.x);
+			color.y += sharedLightCoefficient * (0.9 * lightAmount * readSpheres[intersectIndex].color.y + 0.1 * readSpheres[intersectIndex].color.y);
+			color.z += sharedLightCoefficient * (0.9 * lightAmount * readSpheres[intersectIndex].color.z + 0.1 * readSpheres[intersectIndex].color.z);
+		}
 	}
+
+	SetColor(
+		buffer, 
+		index, 
+		color.x,
+		color.y, 
+		color.z, 
+		color.w);
 }

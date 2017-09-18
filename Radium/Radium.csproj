@@ -56,7 +56,9 @@
     <Compile Include="GpuCompute.cs" />
     <Compile Include="GpuProgram.cs" />
     <Compile Include="IGpuProgram.cs" />
-    <Compile Include="RayTrace.cs" />
+    <Compile Include="Rendering\RayTrace.cs" />
+    <Compile Include="Rendering\PointLight.cs" />
+    <Compile Include="Rendering\Vector3.cs" />
     <None Include="kernels\raytrace.kl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
