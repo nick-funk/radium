@@ -102,3 +102,23 @@ static void Main(string[] args)
   Console.ReadKey();
 }
 ```
+
+# What can it do?
+
+GPU computation is very useful for any parallelizable task. This is why they were developed for graphics as many rendering algorithms fall into the category of "ridiculously parallelizable" problems.
+
+Some examples that are included in the source are:
+
+* Large scale array transforms (multiplying, adding)
+  * I intend to do a Fast Fourier example soon
+* Generating fractals
+* In-depth rendering (formal ray-casting and photon mapping for highly realistic but computationally intensive renders)
+
+There are more, but this is just some examples. The advantage is this library is how easily this can fit into your current application. You can hand pick specific sections that need a boost, convert the method to a short bit of kernel code, run it on the GPU and return the results back to your application code with minimal fuss.
+
+To stop talking, and show you the results, here is the results of a ray tracer kernel I wrote to dump out an animation of a light moving around some spheres.
+
+[![GPU Raytracing using Radium](https://img.youtube.com/vi/Hu1327IZGQg/0.jpg)](https://www.youtube.com/watch?v=Hu1327IZGQg)
+
+This was an 80 frame animation that was computed in under 800 milliseconds on a single nVidia GTX 660 graphics card.
+That's 100 frames per second.
